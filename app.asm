@@ -20,6 +20,9 @@ SPR0_Y          = $D001 ; SPRITE Y COORDINATE
 SPR0_COLOR      = $D027 ; SPRITE 0 COLOR
 
 COLOR_WHITE             = #1
+COLOR_YELLOW            = #7
+
+JOYSTICK_B      = $DC01
 
 INIT    JSR CLEAR
 
@@ -57,7 +60,51 @@ LOAD    LDA SPRITE,X
         CPX #63
         BNE LOAD
        
-LOOP    JMP LOOP
+
+CHECK   
+        LDX #255 ; WAIT A BIT
+        LDY #5
+WAIT    DEX
+        BNE WAIT
+        DEY
+        BNE WAIT
+
+        CMP JOYSTICK_B
+        LDA COLOR_WHITE
+        STA SPR0_COLOR
+        BEQ CHECK
+
+
+READ    LDA JOYSTICK_B
+        STA $02
+
+UP      LDA #%00000001
+        BIT JOYSTICK_B
+        BNE DOWN
+        DEC SPR0_Y
+
+DOWN    LDA #%00000010
+        BIT JOYSTICK_B
+        BNE LEFT
+        INC SPR0_Y
+
+LEFT    LDA #%00000100
+        BIT JOYSTICK_B
+        BNE RIGHT
+        DEC SPR0_X
+
+RIGHT   LDA #%00001000
+        BIT JOYSTICK_B
+        BNE FIRE
+        INC SPR0_X
+
+FIRE    LDA #%00010000
+        BIT JOYSTICK_B
+        BNE CHECK
+        LDA COLOR_YELLOW
+        STA SPR0_COLOR
+        
+        JMP CHECK
 
 
 SPRITE  BYTE 0,32,0
