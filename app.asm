@@ -3,4 +3,81 @@
 *=$0801 
          BYTE $0C, $8, $0A, $00, $9E, $20, $32, $30, $36, $34, $00, $00, $00, $00, $00
 
+CLEAR           = $E544
+
+
+SPR_ENABLE      = $D015 ; FLAGS FOR SPRITE ENABLING
+SPR_MSBX        = $D010 ; FLAGS TO REPRESENT X VALUES LARGER THAN 255
+SPR_COLORMODE   = $D01C ; FLAGS TO SET COLOR MODES (0 = HIGH RES/2-COLOR, 1 = MULTICOLOR/4-COLOR)
+SPR_COLOR0      = $D025 ; SHARED SPRITE COLOR 0
+SPR_COLOR1      = $D026 ; SHARED SPRITE COLOR 1
+
+SPR0_PTR        = $07F8 ; SPRITE 0 DATA POINTER
+SPR0_ADDR       = #$0D  ; SPRITE 0 POINTER VALUE
+SPR0_DATA       = $0340 ; SPRITE 0 DATA ADDRESS (POINTER VALUE * $40)
+SPR0_X          = $D000 ; SPRITE X COORDINATE
+SPR0_Y          = $D001 ; SPRITE Y COORDINATE
+SPR0_COLOR      = $D027 ; SPRITE 0 COLOR
+
+COLOR_WHITE             = #1
+
+INIT    JSR CLEAR
+
+        ; ENABLE SPRITES
+        LDA #%00000001
+        STA SPR_ENABLE
+
+        ; SET COLOR MODES
+        LDA #%00000000
+        STA SPR_COLORMODE
+
+        ; SET SPRITE COLORS
+        LDA COLOR_WHITE
+        STA SPR0_COLOR
+
+        ; SET SPRITE X = 0*255 + 100
+        LDX #%00000000
+        STX SPR_MSBX
+        LDX #100
+        STX SPR0_X
+
+        ; SET SPRITE Y = 100
+        LDY #100
+        STY SPR0_Y
+
+        ; SET SPRITE POINTER
+        LDA SPR0_ADDR
+        STA SPR0_PTR
+
+        ; LOAD SPRITE0 DATA IN A LOOP
+        LDX #0
+LOAD    LDA SPRITE,X
+        STA SPR0_DATA,X
+        INX
+        CPX #63
+        BNE LOAD
+       
 LOOP    JMP LOOP
+
+
+SPRITE  BYTE 0,32,0
+        BYTE 0,112,0
+        BYTE 0,248,0
+        BYTE 1,252,0
+        BYTE 0,112,0
+        BYTE 0,112,0
+        BYTE 0,112,0
+        BYTE 16,112,64
+        BYTE 48,112,96
+        BYTE 127,255,240
+        BYTE 255,255,248
+        BYTE 127,255,240
+        BYTE 48,112,96
+        BYTE 16,112,64
+        BYTE 0,112,0
+        BYTE 0,112,0
+        BYTE 0,112,0
+        BYTE 1,252,0
+        BYTE 0,248,0
+        BYTE 0,112,0
+        BYTE 0,32,0
